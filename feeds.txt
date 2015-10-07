@@ -21,3 +21,14 @@ http://www.reuters.com/rssFeed/newIssuesNews
 http://feeds.reuters.com/reuters/mergersNews
 http://feeds.reuters.com/reuters/governmentfilingsNews
 http://feeds.reuters.com/news/usmarkets
+http://feeds.nytimes.com/nyt/rss/HomePage
+http://hosted.ap.org/lineups/USHEADS-rss_2.0.xml?SITE=RANDOM&SECTION=HOME
+http://rssfeeds.usatoday.com/usatoday-NewsTopStories
+http://www.npr.org/rss/rss.php?id=1001
+http://newsrss.bbc.co.uk/rss/newsonline_world_edition/americas/rss.xml
+http://www.ft.com/rss/home/us
+http://news.google.com/news?pz=1&cf=all&ned=us&hl=en&output=rss
+http://www.foxbusiness.com/about/rss
+http://www.forbes.com/markets/index.xml
+http://www.forbes.com/business/index.xml
+http://www.forbes.com/feeds/popstories.xml
