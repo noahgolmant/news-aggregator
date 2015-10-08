@@ -1,4 +1,4 @@
-from math import log10
+from math import log10, sqrt
 from random import randint
 
 def max_frequency(document):
@@ -119,6 +119,7 @@ def dot_product(vec1, vec2):
 def similarity(doc_vec, query_vec):
     """Document relevance ranking as a measure of the angle between 
        the document vector and a vector representation of the keyword"""
-    assert len(doc_vec) == len(keyword_vec), "Query vector size must match document vector size"
+    assert len(doc_vec) == len(query_vec), "Query vector size must match document vector size"
     
     return dot_product(doc_vec, query_vec) / (vector_length(doc_vec) * vector_length(query_vec))
+
