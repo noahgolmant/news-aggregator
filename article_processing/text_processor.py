@@ -1,4 +1,5 @@
 from math import log10
+from random import randint
 
 def max_frequency(document):
     """Calculated largest term frequency of terms in a document"""
@@ -42,3 +43,69 @@ def vectorize_document(document, document_list, unique_terms):
     vec = [tf_idf(t, document, document_list) for t in unique_terms]
     vec_len = sqrt(sum([t*t for t in vec]))
     return [t / vec_len for t in vec)
+
+def distance(vec1, vec2):
+    """Calculate the distance between two document vectors"""
+    assert len(vec1) == len(vec2)
+    d = 0
+    for v1,v2 in zip(vec1, vec2):
+        d += (v1 - v2) ** 2
+    return sqrt(d)
+
+def reservoir_sample(arr, k):
+    """Return k random samples of elements in arr"""
+    reservoir = arr[:k]
+    for i in range(k+1, len(arr)):
+        j = randint(1, i)
+        if j <= k:
+            reservoir[j] = arr[i]
+    return reservoir
+
+def mean(arr):
+    """Get mean value of an array"""
+    return sum(arr) / len(arr)
+
+def group_by_first(pairs):
+    """Get a list of pairs that relates each unique key to a
+       list of all values that are paired with that key."""
+    keys = []
+    for key, _ in pairs:
+        if key not in keys:
+            keys.append(key)
+    return [[y for x, y in pairs if x == key] for key in keys]
+
+def find_closest(doc_vector, centroids):
+    """Find the closest centroid to a document vector"""
+    return min(centroids, key=lambda centroid: distance(centroid, doc_vector))
+
+def group_by_centroid(document_vectors, centroids):
+    """Get a list of the closest document vectors for each centroid"""
+    centroid_document_pairs = []
+    for doc in document_vectors:
+        doc_centroid = find_closest(doc, centroids)
+        centroid_document_pairs.append([doc_centroid, doc])
+    return group_by_first(centroid_document_pairs)
+
+def find_centroid(cluster):
+    """Get centroid of document vectors in cluster"""
+    mid = []
+    for i in range(len(cluster[0])):
+        mid.append(mean([ [doc[i] for doc in cluster ]))
+    return mid
+
+def k_means(document_vectors, k, max_updates=100):
+    """Find k centroids for document_vectors clusters"""
+    assert len(document_vectors) >= k, 'More clusters than documents'
+
+    num_documents = len(document_vectors)
+    # Choose k random documents for starting centroids
+    old_centroids, n = [], 0
+    centroids = reservoir_sample(document_vectors, k)
+    # Continuusly update centroids based on mean position in its cluster
+    while old_centroids != centroids and n < max_updates:
+        old_centroids = centroids
+        clusters = group_by_centroid(document_vectors, centroids)
+        centroids = [find_centroid(cluster) for cluster in clusters]
+        n += 1
+
+    return centroids

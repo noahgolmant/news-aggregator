@@ -56,6 +56,8 @@ class Article:
     
     def get_article_text(self):
         """Uses newspaper module to get main body of an article"""
+        if hasattr(self, 'text'):
+            return self.text
         news_article = newspaper.Article(self.link)
         news_article.download()
         news_article.parse()
@@ -64,6 +66,9 @@ class Article:
 
     def filter_article_text(self):
         """Filters out stop words and stems each word to get usable text tokens"""
+        if hasattr(self, 'filtered_text'):
+            return self.filtered_text
+
         if not hasattr(self, 'text'):
             self.get_article_text()
         

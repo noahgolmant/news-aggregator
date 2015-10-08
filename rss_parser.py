@@ -12,6 +12,7 @@ def read_rss_urls(filename):
     return [line for line in open(filename, 'r')]
 
 def update_feed(url):
+    print("Updating URL: %s" % url)
     feed = feedparser.parse(url)
     if feed.bozo == 1:
         print("Malformed RSS Feed")
