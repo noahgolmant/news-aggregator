@@ -42,7 +42,7 @@ def vectorize_document(document, document_list, unique_terms):
     """Returns a normalized vector representation of the document in the corpus space"""
     vec = [tf_idf(t, document, document_list) for t in unique_terms]
     vec_len = sqrt(sum([t*t for t in vec]))
-    return [t / vec_len for t in vec)
+    return [t / vec_len for t in vec]
 
 def distance(vec1, vec2):
     """Calculate the distance between two document vectors"""
@@ -90,7 +90,7 @@ def find_centroid(cluster):
     """Get centroid of document vectors in cluster"""
     mid = []
     for i in range(len(cluster[0])):
-        mid.append(mean([ [doc[i] for doc in cluster ]))
+        mid.append(mean([doc[i] for doc in cluster]))
     return mid
 
 def k_means(document_vectors, k, max_updates=100):
