@@ -38,10 +38,13 @@ def unique_terms(document_list):
         term_set += d
     return list(term_set)
 
+def vector_length(vec):
+    return sqrt(sum([t*t for t in vec]))
+
 def vectorize_document(document, document_list, unique_terms):
     """Returns a normalized vector representation of the document in the corpus space"""
     vec = [tf_idf(t, document, document_list) for t in unique_terms]
-    vec_len = sqrt(sum([t*t for t in vec]))
+    vec_len = vector_length(vec)
     return [t / vec_len for t in vec]
 
 def distance(vec1, vec2):
@@ -109,3 +112,13 @@ def k_means(document_vectors, k, max_updates=100):
         n += 1
 
     return centroids
+
+def dot_product(vec1, vec2):
+    return sum([u * v for u,v in zip(vec1, vec2)])
+
+def similarity(doc_vec, query_vec):
+    """Document relevance ranking as a measure of the angle between 
+       the document vector and a vector representation of the keyword"""
+    assert len(doc_vec) == len(keyword_vec), "Query vector size must match document vector size"
+    
+    return dot_product(doc_vec, query_vec) / (vector_length(doc_vec) * vector_length(query_vec))
