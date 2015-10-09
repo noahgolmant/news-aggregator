@@ -53,13 +53,13 @@ def get_unique_publishers():
     links = [get_url_domain(r[0]) for r in ret]
     return set(links)
 
-def get_articles(funct, block_size=20):
+def get_articles(block_size=20):
     """Iterate over blocks of BLOCK_SIZE articles from the database"""
     sql = "SELECT * FROM {}".format(table_name)
-    article_gen = query_gen(sql,block_size=20)    
+    article_gen = query_gen(sql,block_size=20)
     for article_block in article_gen():
-        a = Article.from_sqlentry(article_block[0])
-        funct(a)
+        #a = Article.from_sqlentry(article_block[0])
+        yield [Article.from_sqlentry(a) for a in article_block]
 
 def add_entry(article):
     """ Adds an article entry with the table data:
