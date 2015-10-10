@@ -21,3 +21,4 @@ Use the "-c" flag to get a count of the total number of articles. The "-p" flag 
 - Memoize tf-idf calculation for a given corpus
 - Create flat-file storage for vectorized document data
 - Pipeline document processing routine to asynchronously RSS poll, filter article text, and vectorize documents
+- Apply PCA dimension reduction to get 2D/3D visualization of article relatedness and clustering
