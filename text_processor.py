@@ -1,5 +1,6 @@
 from math import log10, sqrt
 from random import randint
+import sys
 
 def max_frequency(document):
     """Calculated largest term frequency of terms in a document"""
@@ -17,9 +18,17 @@ def augmented_term_frequency(term, document, max_frequency=1):
 
     where f(t,d) is the number of times t occurs in document d.
     """
-    return 0.5 + (0.5 * document.count(term)) / max_raw_frequency
+    return 0.5 + (0.5 * document.count(term)) / max_frequency
 
+def memoize(f):
+    memo = {}
+    def helper(t, *args):
+        if t not in memo:
+            memo[t] = f(t, *args)
+        return memo[t]
+    return helper 
 
+@memoize
 def inv_document_frequency(term, document_list):
     """Logarithmically sclaed fraction of documents that contain the term"""
     num_docs_with_t = len([d for d in document_list if term in d])
@@ -35,7 +44,7 @@ def unique_terms(document_list):
     """Total set of unique terms in a corpus."""
     term_set = set()
     for d in document_list:
-        term_set += d
+        term_set |= set(d)
     return list(term_set)
 
 def vector_length(vec):
@@ -43,9 +52,17 @@ def vector_length(vec):
 
 def vectorize_document(document, document_list, unique_terms):
     """Returns a normalized vector representation of the document in the corpus space"""
-    vec = [tf_idf(t, document, document_list) for t in unique_terms]
+    i = 0
+    num = len(unique_terms)
+    vec = []
+    for t in unique_terms:
+        vec.append(tf_idf(t, document, document_list))
+        i += 1
+        sys.stdout.write("\rtf-idf: {0:.2f}%    ({1}/{2})".format((i / num) * 100, i, num))
+        sys.stdout.flush()
+
     vec_len = vector_length(vec)
-    return [t / vec_len for t in vec]
+    return [t/vec_len for t in vec]
 
 def distance(vec1, vec2):
     """Calculate the distance between two document vectors"""
