@@ -58,9 +58,15 @@ class Article:
         """Uses newspaper module to get main body of an article"""
         if hasattr(self, 'text'):
             return self.text
-        news_article = newspaper.Article(self.link)
-        news_article.download()
-        news_article.parse()
+        
+        try:
+            news_article = newspaper.Article(self.link)
+            news_article.download()
+            news_article.parse()
+        except:
+            print('Failed to download article: ' + self.link)
+            self.text = None
+            return None
         self.text = [w.lower() for w in news_article.text.split()]
         return self.text
 
@@ -72,6 +78,11 @@ class Article:
         if not hasattr(self, 'text'):
             self.get_article_text()
         
+        if not self.text:
+            print('No article text from get_article_text()')
+            self.filtered_text = None
+            return None
+
         self.filtered_text = [stemmer.stem(w) for w in self.text if w not in stop_words]
         return self.filtered_text
 
