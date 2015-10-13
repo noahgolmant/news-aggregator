@@ -20,7 +20,7 @@ def update_feed(url):
     for item in feed.entries:
         a = Article.from_feedparser(item)
         if a:
-            add_entry(a)
+            add_article(a)
             print('Added %s ...' % a.link)
 
 if __name__ == '__main__':

@@ -21,11 +21,12 @@ class Article:
     def __init__(self, raw_data):
         if len(raw_data) != ARTICLE_ENTRY_LENGTH:
             raise ArticleFormatException("Wrong number of entries for article. Expected {0} but got {1}".format(ARTICLE_ENTRY_LENGTH, len(raw_data)))
-
-        self.title        = self.__strip_tags(raw_data[0])
-        self.description  = self.__strip_tags(raw_data[1])
-        self.link         = raw_data[2]
-        self.published    = self.__iso_formatted(raw_data[3])
+        self.title         = self.__strip_tags(raw_data[0])
+        self.description   = self.__strip_tags(raw_data[1])
+        self.link          = raw_data[2]
+        self.published     = raw_data[3]
+        self.text          = None
+        self.filtered_text = None
 
     @classmethod
     def from_feedparser(cls, item):
@@ -40,9 +41,9 @@ class Article:
     @classmethod
     def from_sqlentry(cls, entry):
         """Gets article object from an SQL row entry"""
-        published = strptime(entry[-1], '%Y-%m-%d %H:%M:%S')
+        #published = strptime(entry[-1], '%Y-%m-%d %H:%M:%S')
         
-        return cls((entry[1],entry[2],entry[3],published))
+        return cls((entry[1],entry[2],entry[3],entry[-1]))
 
     def sql_entry(self):
         return (self.title, self.description, self.link, self.published)
@@ -56,7 +57,7 @@ class Article:
     
     def get_article_text(self):
         """Uses newspaper module to get main body of an article"""
-        if hasattr(self, 'text'):
+        if self.text:
             return self.text
         
         try:
@@ -65,17 +66,19 @@ class Article:
             news_article.parse()
         except:
             print('Failed to download article: ' + self.link)
-            self.text = None
             return None
         self.text = [w.lower() for w in news_article.text.split()]
         return self.text
 
     def filter_article_text(self):
         """Filters out stop words and stems each word to get usable text tokens"""
-        if hasattr(self, 'filtered_text'):
+        if self.filtered_text:
             return self.filtered_text
-
-        if not hasattr(self, 'text'):
+        elif db_manager.is_filtered(self):
+            self.filtered_text = db_manager.get_filtered_text(self)
+        elif db_manager.has_failed(self):
+            return None
+        else:
             self.get_article_text()
         
         if not self.text:

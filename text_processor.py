@@ -1,12 +1,14 @@
 from math import log10, sqrt
 from random import randint
 import sys
+from functools import reduce
+from operator import or_
 
 def max_frequency(document):
     """Calculated largest term frequency of terms in a document"""
     max_f = 1
     for w in set(document):
-        max_f = max(max_f, term_frequency(w, document))
+        max_f = max(max_f, augmented_term_frequency(w, document))
     return max_f
 
 def augmented_term_frequency(term, document, max_frequency=1):
@@ -42,10 +44,11 @@ def tf_idf(term, document, document_list):
 
 def unique_terms(document_list):
     """Total set of unique terms in a corpus."""
-    term_set = set()
-    for d in document_list:
-        term_set |= set(d)
-    return list(term_set)
+    #term_set = set()
+    return list(reduce(or_, document_list))
+    #for d in document_list:
+    #    term_set |= set(d)
+    #return list(term_set)
 
 def vector_length(vec):
     return sqrt(sum([t*t for t in vec]))
