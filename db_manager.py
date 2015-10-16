@@ -5,6 +5,7 @@ from article import *
 import atexit
 
 db_conn = psycopg2.connect("dbname=article_db user=postgres")
+db_conn.autocommit = True
 
 @atexit.register
 def close_db():
@@ -13,6 +14,7 @@ def close_db():
 def perform_query(query, args=None):
     """Submit a query with any necessary args for a single result"""
     ret = (-1,)
+   
     with db_conn.cursor() as curr:
         if args:
             curr.execute(query, args)    
@@ -20,10 +22,11 @@ def perform_query(query, args=None):
             curr.execute(query)
         try:
             ret = curr.fetchone()
+            #db_conn.commit()
         except psycopg2.ProgrammingError: # No result produced
             ret = (curr.rowcount,)
-        db_conn.commit()
-        curr.close()
+            #db_conn.rollback()
+        #curr.close()
     return ret
 
 def memoize(f):
@@ -47,7 +50,7 @@ def is_in_table(table, article):
     if article_id < 1:
         return False
     query = "SELECT count(1) FROM {} WHERE article_id = %s;".format(table)
-    return perform_query(query, (article_id,))[0]
+    return perform_query(query, (article_id,))[0] > 0
 
 ######################
 ##  ARTICLES TABLE  ##
@@ -101,7 +104,7 @@ def add_article(article):
     """
     if not get_article_id(article):
         return 0
-    query = "UPSERT INTO (null, title, description, link, published);"
+    query = "INSERT INTO articles (null, title, description, link, published) VALUES (%s, %s, %s, %s) ;"
     args = (article.title, article.description, article.link, article.published)
     return perform_query(query, args)[0]
 
@@ -143,7 +146,7 @@ def get_filtered_text(article):
     id = get_article_id(article)
     if id < 1:
         return -1
-    return perform_query(query, (id,))
+    return perform_query(query, (id,))[0]
 
 def is_filtered(article):
     """ Checks if an article has already been successfully filtered """
@@ -155,11 +158,11 @@ def is_filtered(article):
 
 def add_tfs(article, term_frequencies):
     """ Stores term frequencies for an individual article """
-    query = "INSERT INTO term_frequencies(article_id, term_frequencies) VALUES (%s, %s);"
+    query = "INSERT INTO term_frequencies (article_id, term_frequencies) VALUES (%s, %s);"
     id = get_article_id(article)
-    if id < 1 or has_tfs(article):
+    if has_tfs(article):
         return -1
-    args = (id, term_frequences)
+    args = (id, term_frequencies)
     return perform_query(query, args)[0]
 
 def get_tfs(article):
@@ -182,7 +185,7 @@ def has_tfs(article):
 def add_idf(term, idf):
     if has_idf(term):
         return 0
-    query = "INTO inverse_document_frequencies(term, idf) VALUES (%s, %s);"
+    query = "INSERT INTO inverse_document_frequencies (term, idf) VALUES (%s, %s);"
     args = (term, idf)
     return perform_query(query, args)[0]
 
@@ -192,7 +195,8 @@ def get_idf(term):
     return perform_query(query, (term,))[0]
 
 def has_idf(term):
-    return is_in_table('inverse_document_frequencies', term)
+    query = "SELECT count(1) FROM inverse_document_frequencies WHERE term = %s;"
+    return perform_query(query, (term,))[0]
 
 def get_idfs():
     query = "SELECT idf FROM inverse_document_frequencies;"

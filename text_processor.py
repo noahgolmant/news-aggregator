@@ -44,11 +44,10 @@ def tf_idf(term, document, document_list):
 
 def unique_terms(document_list):
     """Total set of unique terms in a corpus."""
-    #term_set = set()
-    return list(reduce(or_, document_list))
-    #for d in document_list:
-    #    term_set |= set(d)
-    #return list(term_set)
+    term_set = set()
+    for d in document_list:
+        term_set |= set(d)
+    return list(term_set)
 
 def vector_length(vec):
     return sqrt(sum([t*t for t in vec]))
